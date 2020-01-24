@@ -19,7 +19,7 @@ module.exports = {
         return parametrizeFunction(parameters);
     },
 
-    shellRun: (command) => {
+    shellRun: async (command) => {
         return exec(command)
             .then(function (result) {
                 var stderr = result.stderr;

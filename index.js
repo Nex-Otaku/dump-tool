@@ -75,7 +75,6 @@ const applyDump = async () => {
     if ((tableName.length === 0) || (tableName === selectedFile)) {
         throw new Error('Не удалось извлечь название таблицы');
     }
-    console.log(tableName);
 
     // Ищем соответствующие таблицы в локальной БД.
     let credentials = {
@@ -86,7 +85,6 @@ const applyDump = async () => {
     };
 
     const connection = await mysqlUtils.getConnection(credentials);
-    //console.log(connection);
 
     const databases = await mysqlUtils.getDatabasesList(connection);
 
@@ -102,13 +100,51 @@ const applyDump = async () => {
     }
 
     // Выводим выбор из совпадающих БД.
+    results = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'db',
+            message: 'База данных',
+            choices: matchedDbList,
+            pageSize: 30,
+        }
+    ]);
+    lib.newline();
 
+    const selectedDb = results.db;
+
+    // Переключаемся в выбранную БД.
+    await mysqlUtils.selectDb(connection, selectedDb);
 
     // Очищаем таблицу.
-    // Разворачиваем дамп.
+    await connection.execute(`delete from ${tableName}`);
 
     // Закрываем соединение.
     connection.close();
+
+    // Разворачиваем дамп.
+    const status = new Spinner('Выгружаю данные...');
+    status.start();
+
+    const passwordOption = credentials.password.length === 0 ? '' : ' -p {password}';
+    const dumpCommand = 'mysql -u {user} -h {host} --port {port} ' + passwordOption + ' {db} < {dumpfile}';
+    const dumpCommandParametrized = lib.parametrize(dumpCommand, {
+        host: credentials.host,
+        port: credentials.port,
+        user: credentials.username,
+        password: credentials.password,
+        db: selectedDb,
+        dumpfile: selectedFile
+    });
+
+    let dumpOutput = await lib.shellRun(dumpCommandParametrized);
+    status.stop();
+
+    if (_.trim(dumpOutput).length > 0) {
+        console.log(dumpOutput);
+    }
+
+    console.log('Дамп выгружен.');
 };
 
 const dumpData = async () => {
