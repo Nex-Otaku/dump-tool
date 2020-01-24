@@ -8,6 +8,10 @@ const conf = new Configstore(pkg.name);
 
 module.exports = {
 
+    extractColumn: (arr, column) => {
+        return arr.map(x => x[column])
+    },
+
     getAnswers: () => {
         return inquirer;
     },

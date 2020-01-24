@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const clear = require('clear');
 const figlet = require('figlet');
 
-const files = require('./app/files');
+// const files = require('./app/files');
 
 clear();
 
@@ -19,9 +19,10 @@ console.log(
 //const inquirer  = require('./app/inquirer');
 const inquirer = require('inquirer');
 
-const config = require('./app/config');
+// const config = require('./app/config');
 
 const lib = require('./app/lib');
+
 
 const run = async () => {
     // const credentials = await inquirer.askGithubCredentials();
@@ -42,18 +43,33 @@ const run = async () => {
 
     console.log(credentials);
 
-    var mysql      = require('mysql');
-    var connection = mysql.createConnection({
+
+    // get the client
+    const mysql = require('mysql2/promise');
+    // create the connection
+    const connection = await mysql.createConnection({
         host     : credentials.host,
         port: credentials.port,
-        user     : credentials.user,
+        user     : credentials.username,
         password : credentials.password,
     });
+    // query database
+    let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
+    // console.log(rows[0].solution);
 
+    //return null;
+    // var mysql      = require('mysql');
+    // var connection = mysql.createConnection({
+    //     host     : credentials.host,
+    //     port: credentials.port,
+    //     user     : credentials.username,
+    //     password : credentials.password,
+    // });
+/*
     connection.connect();
-
-    connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-        //if (error) throw error;
+    await connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+        console.log('Selected.');
+        if (error) throw error;
         if (error) {
             inquirer.prompt([
                     {
@@ -90,10 +106,26 @@ const run = async () => {
                 });
         } else {
             console.log('The solution is: ', results[0].solution);
+
         }
     });
-
+    console.log('Подключились к БД.');
     connection.end();
+*/
+
+
+
+    // Выбираем БД для дампа из списка.
+    [rows, fields] = await connection.execute('show databases');
+    // console.log(rows[0].Database);
+    let databases = lib.extractColumn(rows, 'Database');
+    console.log(databases);
+
+
+
+    // Выбираем таблицу для дампа из списка.
+
+    connection.close();
 };
 
 
