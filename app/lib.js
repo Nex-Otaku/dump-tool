@@ -12,6 +12,10 @@ module.exports = {
         return arr.map(x => x[column])
     },
 
+    extractFirstColumn: (arr) => {
+        return arr.map(x => x[Object.keys(x)[0]]);
+    },
+
     getAnswers: () => {
         return inquirer;
     },

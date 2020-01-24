@@ -55,63 +55,6 @@ const run = async () => {
     });
     // query database
     let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
-    // console.log(rows[0].solution);
-
-    //return null;
-    // var mysql      = require('mysql');
-    // var connection = mysql.createConnection({
-    //     host     : credentials.host,
-    //     port: credentials.port,
-    //     user     : credentials.username,
-    //     password : credentials.password,
-    // });
-/*
-    connection.connect();
-    await connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-        console.log('Selected.');
-        if (error) throw error;
-        if (error) {
-            inquirer.prompt([
-                    {
-                        type: 'expand',
-                        message: 'Не удалось подключиться: ',
-                        name: 'action',
-                        choices: [
-                            {
-                                key: 'r',
-                                name: 'Retry',
-                                value: 'retry'
-                            },
-                            {
-                                key: 'd',
-                                name: 'Delete credentials',
-                                value: 'delete'
-                            },
-                            {
-                                key: 'x',
-                                name: 'Exit',
-                                value: 'exit'
-                            }
-                        ]
-                    }
-                ])
-                .then(answers => {
-                    console.log(answers);
-                    if (answers.action === 'retry') {
-                        return run();
-                    }
-                    if (answers.action === 'delete') {
-                        lib.clearCredentials();
-                    }
-                });
-        } else {
-            console.log('The solution is: ', results[0].solution);
-
-        }
-    });
-    console.log('Подключились к БД.');
-    connection.end();
-*/
 
 
 
@@ -121,9 +64,45 @@ const run = async () => {
     let databases = lib.extractColumn(rows, 'Database');
     console.log(databases);
 
+    let results = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'db',
+            message: 'База данных',
+            choices: databases
+        }
+    ]);
 
+    console.log(results.db);
+    const selectedDb = results.db;
+
+    // Выбираем БД.
+    connection.changeUser({database : selectedDb}, function(err) {
+        if (err) throw err;
+    });
 
     // Выбираем таблицу для дампа из списка.
+
+    [rows, fields] = await connection.execute('show tables');
+    // console.log(rows);
+    let tables = lib.extractFirstColumn(rows);
+    // console.log(tables);
+
+    results = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'table',
+            message: 'Таблица',
+            choices: tables
+        }
+    ]);
+
+    console.log(results.table);
+    const selectedTable = results.table;
+
+    // Выгружаем дамп с данными таблицы.
+
+    //mysqldump --no-create-info -u %user% -p%password% -h %host% --port %port% --single-transaction --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 %db% %table% > %table%-data.sql
 
     connection.close();
 };
