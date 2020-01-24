@@ -1,6 +1,29 @@
 const inquirer = require('inquirer');
 
+
+const Configstore = require('configstore');
+const pkg = require('../package.json');
+const conf = new Configstore(pkg.name);
+
+
 module.exports = {
+
+    getAnswers: () => {
+        return inquirer;
+    },
+
+    getCredentials: () => {
+        return conf.get('mysql.credentials');
+    },
+
+    setCredentials: (credentials) => {
+        conf.set('mysql.credentials', credentials);
+    },
+
+    clearCredentials: () => {
+        conf.delete('mysql.credentials');
+    },
+
     askCredentials: () => {
         const questions = [
             {

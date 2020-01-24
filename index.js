@@ -16,7 +16,8 @@ console.log(
 
 
 
-const inquirer  = require('./app/inquirer');
+//const inquirer  = require('./app/inquirer');
+const inquirer = require('inquirer');
 
 const config = require('./app/config');
 
@@ -33,9 +34,66 @@ const run = async () => {
     // }
     // console.log(token);
 
+    let credentials = lib.getCredentials();
+    if (!credentials) {
+        credentials = await lib.askCredentials();
+        lib.setCredentials(credentials);
+    }
 
-    const credentials = await lib.askCredentials();
     console.log(credentials);
+
+    var mysql      = require('mysql');
+    var connection = mysql.createConnection({
+        host     : credentials.host,
+        port: credentials.port,
+        user     : credentials.user,
+        password : credentials.password,
+    });
+
+    connection.connect();
+
+    connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+        //if (error) throw error;
+        if (error) {
+            inquirer.prompt([
+                    {
+                        type: 'expand',
+                        message: 'Не удалось подключиться: ',
+                        name: 'action',
+                        choices: [
+                            {
+                                key: 'r',
+                                name: 'Retry',
+                                value: 'retry'
+                            },
+                            {
+                                key: 'd',
+                                name: 'Delete credentials',
+                                value: 'delete'
+                            },
+                            {
+                                key: 'x',
+                                name: 'Exit',
+                                value: 'exit'
+                            }
+                        ]
+                    }
+                ])
+                .then(answers => {
+                    console.log(answers);
+                    if (answers.action === 'retry') {
+                        return run();
+                    }
+                    if (answers.action === 'delete') {
+                        lib.clearCredentials();
+                    }
+                });
+        } else {
+            console.log('The solution is: ', results[0].solution);
+        }
+    });
+
+    connection.end();
 };
 
 
