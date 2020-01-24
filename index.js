@@ -89,6 +89,7 @@ const run = async () => {
     // Выбираем таблицу для дампа из списка.
 
     [rows, fields] = await connection.execute('show tables');
+    connection.close();
     // console.log(rows);
     let tables = lib.extractFirstColumn(rows);
     // console.log(tables);
@@ -112,7 +113,10 @@ const run = async () => {
 
     //mysqldump --no-create-info -u %user% -p%password% -h %host% --port %port% --single-transaction --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 %db% %table% > %table%-data.sql
 
-    connection.close();
+    let stdout = await lib.shellRun('echo hello');
+
+    console.log(_.trim(stdout));
+
 };
 
 

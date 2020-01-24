@@ -5,8 +5,25 @@ const Configstore = require('configstore');
 const pkg = require('../package.json');
 const conf = new Configstore(pkg.name);
 
+const exec = require('child-process-promise').exec;
+
 
 module.exports = {
+
+    shellRun: (command) => {
+        return exec(command)
+            .then(function (result) {
+                var stderr = result.stderr;
+                if (stderr.length > 0) {
+                    throw new Error(stderr);
+                }
+                return result.stdout;
+            })
+            .catch(function (err) {
+                console.error('ERROR: ', err);
+            });
+    },
+
     newline: () => {
         console.log();
     },
