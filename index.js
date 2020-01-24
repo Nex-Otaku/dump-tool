@@ -42,8 +42,13 @@ const run = async () => {
     }
 };
 
+
+const files = require('./app/files');
+
 const applyDump = async () => {
     // Ищем файл по маске *.sql
+    const dumpFiles = files.getFilesWithExtension('.', 'sql');
+    console.log(dumpFiles);
     // Даём выбрать файл. (Выводим, какое количество времени назад он был создан)
     // Определяем имя таблицы.
     // Ищем соответствующие таблицы в локальной БД.
