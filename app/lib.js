@@ -7,8 +7,17 @@ const conf = new Configstore(pkg.name);
 
 const exec = require('child-process-promise').exec;
 
+const _ = require('lodash');
+
+const chalk = require('chalk');
 
 module.exports = {
+
+    parametrize: (template, parameters) => {
+        let templatePrepared = _.replace(template, new RegExp('\{(\\w+)\}', 'g'), '<%= $1 %>');
+        let parametrizeFunction = _.template(templatePrepared);
+        return parametrizeFunction(parameters);
+    },
 
     shellRun: (command) => {
         return exec(command)
@@ -30,7 +39,7 @@ module.exports = {
 
     reportCredentials: (credentials) => {
         let shortDsn = credentials.username + '@' + credentials.host + ':' + credentials.port;
-        console.log(shortDsn);
+        console.log(chalk.green(shortDsn));
     },
 
     extractColumn: (arr, column) => {

@@ -4,9 +4,10 @@ const chalk = require('chalk');
 const clear = require('clear');
 const figlet = require('figlet');
 
-const _ = require('lodash');
+const CLI = require('clui');
+const Spinner = CLI.Spinner;
 
-// const files = require('./app/files');
+const _ = require('lodash');
 
 clear();
 
@@ -16,27 +17,42 @@ console.log(
     )
 );
 
-
-
-//const inquirer  = require('./app/inquirer');
 const inquirer = require('inquirer');
-
-// const config = require('./app/config');
 
 const lib = require('./app/lib');
 
-
 const run = async () => {
-    // const credentials = await inquirer.askGithubCredentials();
-    // console.log(credentials);
+    let results = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'action',
+            message: 'Действия',
+            choices: ['Скачать дамп', 'Развернуть дамп']
+        }
+    ]);
+    lib.newline();
 
-    // let token = github.getStoredGithubToken();
-    // if (!token) {
-    //     await github.setGithubCredentials();
-    //     token = await github.registerNewToken();
-    // }
-    // console.log(token);
+    const selectedAction = results.action;
 
+    if (selectedAction === 'Скачать дамп') {
+        await dumpData();
+    }
+    if (selectedAction === 'Развернуть дамп') {
+        await applyDump();
+    }
+};
+
+const applyDump = async () => {
+    // Ищем файл по маске *.sql
+    // Даём выбрать файл. (Выводим, какое количество времени назад он был создан)
+    // Определяем имя таблицы.
+    // Ищем соответствующие таблицы в локальной БД.
+    // Выводим выбор из совпадающих БД.
+    // Очищаем таблицу.
+    // Разворачиваем дамп.
+};
+
+const dumpData = async () => {
     let credentials = lib.getCredentials();
     if (!credentials) {
         credentials = await lib.askCredentials();
@@ -45,28 +61,20 @@ const run = async () => {
     lib.reportCredentials(credentials);
     lib.newline();
 
-
-    // get the client
     const mysql = require('mysql2/promise');
-    // create the connection
     const connection = await mysql.createConnection({
         host     : credentials.host,
         port: credentials.port,
         user     : credentials.username,
         password : credentials.password,
     });
-    // query database
     let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
-
-
 
     // Выбираем БД для дампа из списка.
     [rows, fields] = await connection.execute('show databases');
-    // console.log(rows[0].Database);
     let databases = lib.extractColumn(rows, 'Database');
     // Исключаем служебную таблицу.
     databases = _.without(databases, 'information_schema');
-    //console.log(databases);
 
     let results = await inquirer.prompt([
         {
@@ -78,21 +86,17 @@ const run = async () => {
     ]);
     lib.newline();
 
-    // console.log(results.db);
     const selectedDb = results.db;
 
-    // Выбираем БД.
+    // Устанавливаем используемую БД в подключении.
     connection.changeUser({database : selectedDb}, function(err) {
         if (err) throw err;
     });
 
     // Выбираем таблицу для дампа из списка.
-
     [rows, fields] = await connection.execute('show tables');
     connection.close();
-    // console.log(rows);
     let tables = lib.extractFirstColumn(rows);
-    // console.log(tables);
 
     results = await inquirer.prompt([
         {
@@ -105,20 +109,30 @@ const run = async () => {
     ]);
     lib.newline();
 
-    // console.log(results.table);
     const selectedTable = results.table;
 
     // Выгружаем дамп с данными таблицы.
-    // _.
+    const status = new Spinner('Выгружаю данные...');
+    status.start();
 
-    //mysqldump --no-create-info -u %user% -p%password% -h %host% --port %port% --single-transaction --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 %db% %table% > %table%-data.sql
+    const dumpCommand = 'mysqldump --no-create-info -u {user} -p{password} -h {host} --port {port} --single-transaction --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {table}-data.sql';
+    const dumpCommandParametrized = lib.parametrize(dumpCommand, {
+        host: credentials.host,
+        port: credentials.port,
+        user: credentials.username,
+        password: credentials.password,
+        db: selectedDb,
+        table: selectedTable
+    });
 
-    let stdout = await lib.shellRun('echo hello');
+    let dumpOutput = await lib.shellRun(dumpCommandParametrized);
+    status.stop();
 
-    console.log(_.trim(stdout));
+    if (_.trim(dumpOutput).length > 0) {
+        console.log(dumpOutput);
+    }
 
+    console.log('Дамп выгружен.');
 };
 
-
-
-run();
+run().then();
