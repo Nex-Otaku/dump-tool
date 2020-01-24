@@ -50,20 +50,12 @@ module.exports = {
         return arr.map(x => x[Object.keys(x)[0]]);
     },
 
-    getAnswers: () => {
-        return inquirer;
-    },
-
     getCredentials: () => {
         return conf.get('mysql.credentials');
     },
 
     setCredentials: (credentials) => {
         conf.set('mysql.credentials', credentials);
-    },
-
-    clearCredentials: () => {
-        conf.delete('mysql.credentials');
     },
 
     askCredentials: () => {

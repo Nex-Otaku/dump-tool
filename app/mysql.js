@@ -1,17 +1,5 @@
-const CLI = require('clui');
-const Configstore = require('configstore');
-// const Octokit = require('@octokit/rest');
-const Spinner = CLI.Spinner;
-
-const inquirer = require('./inquirer');
-const pkg = require('../package.json');
-
-const conf = new Configstore(pkg.name);
-
 const mysql = require('mysql2/promise');
-
 const _ = require('lodash');
-
 const lib = require('./lib');
 
 module.exports = {
@@ -48,18 +36,5 @@ module.exports = {
         let databases = lib.extractColumn(rows, 'Database');
         // Исключаем служебную таблицу.
         return _.without(databases, 'information_schema');
-    },
-
-    setDatabase: (conection, database) => {
-        connection.changeUser({database : selectedDb}, function(err) {
-            if (err) throw err;
-        });
-    },
-    // getInstance: () => {
-    //     return octokit;
-    // },
-
-    getStoredGithubToken: () => {
-        return conf.get('github.token');
     },
 };
