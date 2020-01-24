@@ -4,6 +4,8 @@ const chalk = require('chalk');
 const clear = require('clear');
 const figlet = require('figlet');
 
+const _ = require('lodash');
+
 // const files = require('./app/files');
 
 clear();
@@ -40,8 +42,8 @@ const run = async () => {
         credentials = await lib.askCredentials();
         lib.setCredentials(credentials);
     }
-
-    console.log(credentials);
+    lib.reportCredentials(credentials);
+    lib.newline();
 
 
     // get the client
@@ -62,7 +64,9 @@ const run = async () => {
     [rows, fields] = await connection.execute('show databases');
     // console.log(rows[0].Database);
     let databases = lib.extractColumn(rows, 'Database');
-    console.log(databases);
+    // Исключаем служебную таблицу.
+    databases = _.without(databases, 'information_schema');
+    //console.log(databases);
 
     let results = await inquirer.prompt([
         {
@@ -72,8 +76,9 @@ const run = async () => {
             choices: databases
         }
     ]);
+    lib.newline();
 
-    console.log(results.db);
+    // console.log(results.db);
     const selectedDb = results.db;
 
     // Выбираем БД.
@@ -93,14 +98,17 @@ const run = async () => {
             type: 'list',
             name: 'table',
             message: 'Таблица',
-            choices: tables
+            choices: tables,
+            pageSize: 30,
         }
     ]);
+    lib.newline();
 
-    console.log(results.table);
+    // console.log(results.table);
     const selectedTable = results.table;
 
     // Выгружаем дамп с данными таблицы.
+    // _.
 
     //mysqldump --no-create-info -u %user% -p%password% -h %host% --port %port% --single-transaction --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 %db% %table% > %table%-data.sql
 

@@ -7,6 +7,14 @@ const conf = new Configstore(pkg.name);
 
 
 module.exports = {
+    newline: () => {
+        console.log();
+    },
+
+    reportCredentials: (credentials) => {
+        let shortDsn = credentials.username + '@' + credentials.host + ':' + credentials.port;
+        console.log(shortDsn);
+    },
 
     extractColumn: (arr, column) => {
         return arr.map(x => x[column])
