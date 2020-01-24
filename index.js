@@ -42,19 +42,73 @@ const run = async () => {
     }
 };
 
+const mysql = require('mysql2/promise');
+
+
+const mysqlUtils = require('./app/mysql');
+
 
 const files = require('./app/files');
 
 const applyDump = async () => {
     // Ищем файл по маске *.sql
-    const dumpFiles = files.getFilesWithExtension('.', 'sql');
-    console.log(dumpFiles);
+    let pattern = '.*-data\.sql';
+    let regex = new RegExp(pattern, 'ig');
+    const dumpFiles = files.getFilesWithRegex('.', regex);
+
     // Даём выбрать файл. (Выводим, какое количество времени назад он был создан)
+    let results = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'dump',
+            message: 'Файл дампа',
+            choices: dumpFiles,
+            pageSize: 30,
+        }
+    ]);
+    lib.newline();
+
+    const selectedFile = results.dump;
+
     // Определяем имя таблицы.
+    let tableName = _.replace(selectedFile, '-data.sql', '');
+    if ((tableName.length === 0) || (tableName === selectedFile)) {
+        throw new Error('Не удалось извлечь название таблицы');
+    }
+    console.log(tableName);
+
     // Ищем соответствующие таблицы в локальной БД.
+    let credentials = {
+        host: 'localhost',
+        port: 3306,
+        username: 'root',
+        password: ''
+    };
+
+    const connection = await mysqlUtils.getConnection(credentials);
+    //console.log(connection);
+
+    const databases = await mysqlUtils.getDatabasesList(connection);
+
+    let matchedDbList = [];
+    for (let i = 0; i < databases.length; i++) {
+        let db = databases[i];
+        // console.log(db);
+        await mysqlUtils.selectDb(connection, db);
+        const matched = await mysqlUtils.existTable(connection, tableName);
+        if (matched) {
+            matchedDbList.push(db);
+        }
+    }
+
     // Выводим выбор из совпадающих БД.
+
+
     // Очищаем таблицу.
     // Разворачиваем дамп.
+
+    // Закрываем соединение.
+    connection.close();
 };
 
 const dumpData = async () => {
@@ -66,7 +120,6 @@ const dumpData = async () => {
     lib.reportCredentials(credentials);
     lib.newline();
 
-    const mysql = require('mysql2/promise');
     const connection = await mysql.createConnection({
         host     : credentials.host,
         port: credentials.port,
@@ -100,7 +153,6 @@ const dumpData = async () => {
 
     // Выбираем таблицу для дампа из списка.
     [rows, fields] = await connection.execute('show tables');
-    connection.close();
     let tables = lib.extractFirstColumn(rows);
 
     results = await inquirer.prompt([
@@ -138,6 +190,9 @@ const dumpData = async () => {
     }
 
     console.log('Дамп выгружен.');
+
+    // Закрываем соединение.
+    connection.close();
 };
 
 run().then();

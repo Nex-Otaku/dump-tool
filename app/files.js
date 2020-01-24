@@ -5,10 +5,8 @@ const _ = require('lodash');
 
 module.exports = {
 
-    getFilesWithExtension: (path, extension) => {
+    getFilesWithRegex: (path, regex) => {
         let dirCont = fs.readdirSync(path);
-        let pattern = '.*\.(' + extension + ')';
-        let regex = new RegExp(pattern, 'ig');
         return dirCont.filter( function( elm ) {return elm.match(regex);});
     },
 
