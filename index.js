@@ -33,6 +33,8 @@ const mysqlUtils = require('./app/mysql');
 
 const files = require('./app/files');
 
+const credentials = require('./app/credentials');
+
 const applyDump = async () => {
     // Ищем файл по маске *.sql
     let pattern = '.*-data\.sql';
@@ -60,14 +62,14 @@ const applyDump = async () => {
     }
 
     // Ищем соответствующие таблицы в локальной БД.
-    let credentials = {
+    let local = {
         host: 'localhost',
         port: 3306,
         username: 'root',
         password: ''
     };
 
-    const connection = await mysqlUtils.getConnection(credentials);
+    const connection = await mysqlUtils.getConnection(local);
 
     const databases = await mysqlUtils.getDatabasesList(connection);
 
@@ -109,13 +111,13 @@ const applyDump = async () => {
     const status = new Spinner('Выгружаю данные...');
     status.start();
 
-    const passwordOption = credentials.password.length === 0 ? '' : ' -p {password}';
+    const passwordOption = local.password.length === 0 ? '' : ' -p {password}';
     const dumpCommand = 'mysql -u {user} -h {host} --port {port} ' + passwordOption + ' {db} < {dumpfile}';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
-        host: credentials.host,
-        port: credentials.port,
-        user: credentials.username,
-        password: credentials.password,
+        host: local.host,
+        port: local.port,
+        user: local.username,
+        password: local.password,
         db: selectedDb,
         dumpfile: selectedFile
     });
@@ -131,19 +133,19 @@ const applyDump = async () => {
 };
 
 const dumpData = async () => {
-    let credentials = lib.getCredentials();
-    if (!credentials) {
-        credentials = await lib.askCredentials();
-        lib.setCredentials(credentials);
+    let remote = credentials.get();
+    if (!remote) {
+        remote = await credentials.ask();
+        credentials.set(remote);
+        credentials.report(remote);
+        lib.newline();
     }
-    lib.reportCredentials(credentials);
-    lib.newline();
 
     const connection = await mysql.createConnection({
-        host     : credentials.host,
-        port: credentials.port,
-        user     : credentials.username,
-        password : credentials.password,
+        host     : remote.host,
+        port: remote.port,
+        user     : remote.username,
+        password : remote.password,
     });
     let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
 
@@ -193,10 +195,10 @@ const dumpData = async () => {
 
     const dumpCommand = 'mysqldump --no-create-info -u {user} -p{password} -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {table}-data.sql';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
-        host: credentials.host,
-        port: credentials.port,
-        user: credentials.username,
-        password: credentials.password,
+        host: remote.host,
+        port: remote.port,
+        user: remote.username,
+        password: remote.password,
         db: selectedDb,
         table: selectedTable
     });
@@ -221,8 +223,8 @@ const printHeader = () => {
         )
     );
 
-    let credentials = lib.getCredentials();
-    lib.reportCredentials(credentials);
+    let remote = credentials.get();
+    credentials.report(remote);
     lib.newline();
 };
 
@@ -244,8 +246,13 @@ const mainLoop = async () => {
         if (selectedAction === 'Развернуть дамп') {
             await applyDump();
         }
+
         if (selectedAction === 'Выход') {
             running = false;
+        }
+
+        if (running) {
+            await lib.keypress();
         }
     }
 };

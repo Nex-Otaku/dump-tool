@@ -1,15 +1,10 @@
-const inquirer = require('inquirer');
-
-
-const Configstore = require('configstore');
-const pkg = require('../package.json');
-const conf = new Configstore(pkg.name);
-
 const exec = require('child-process-promise').exec;
 
 const _ = require('lodash');
 
-const chalk = require('chalk');
+const pressAnyKey = require('press-any-key');
+
+
 
 module.exports = {
 
@@ -37,15 +32,6 @@ module.exports = {
         console.log();
     },
 
-    reportCredentials: (credentials) => {
-        if (!credentials) {
-            console.log(chalk.red('Не настроено подключение'));
-            return;
-        }
-        let shortDsn = credentials.username + '@' + credentials.host + ':' + credentials.port;
-        console.log(chalk.green(shortDsn));
-    },
-
     extractColumn: (arr, column) => {
         return arr.map(x => x[column])
     },
@@ -54,67 +40,8 @@ module.exports = {
         return arr.map(x => x[Object.keys(x)[0]]);
     },
 
-    getCredentials: () => {
-        return conf.get('mysql.credentials');
-    },
-
-    setCredentials: (credentials) => {
-        conf.set('mysql.credentials', credentials);
-    },
-
-    askCredentials: () => {
-        const questions = [
-            {
-                name: 'host',
-                type: 'input',
-                message: 'Хост:',
-                default: 'localhost',
-                validate: function( value ) {
-                    if (value.length) {
-                        return true;
-                    } else {
-                        return 'Введите хост';
-                    }
-                }
-            },
-            {
-                name: 'port',
-                type: 'input',
-                default: '3306',
-                message: 'Порт:',
-                validate: function( value ) {
-                    if (value.length) {
-                        return true;
-                    } else {
-                        return 'Введите порт';
-                    }
-                }
-            },
-            {
-                name: 'username',
-                type: 'input',
-                message: 'Введите имя пользователя:',
-                validate: function( value ) {
-                    if (value.length) {
-                        return true;
-                    } else {
-                        return 'Введите имя пользователя.';
-                    }
-                }
-            },
-            {
-                name: 'password',
-                type: 'password',
-                message: 'Введите пароль:',
-                validate: function(value) {
-                    if (value.length) {
-                        return true;
-                    } else {
-                        return 'Введите пароль.';
-                    }
-                }
-            }
-        ];
-        return inquirer.prompt(questions);
-    },
+    keypress: async () => {
+        console.log();
+        return pressAnyKey('Нажмите любую клавишу...');
+    }
 };
