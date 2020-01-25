@@ -38,6 +38,10 @@ module.exports = {
     },
 
     reportCredentials: (credentials) => {
+        if (!credentials) {
+            console.log(chalk.red('Не настроено подключение'));
+            return;
+        }
         let shortDsn = credentials.username + '@' + credentials.host + ':' + credentials.port;
         console.log(chalk.green(shortDsn));
     },

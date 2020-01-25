@@ -7,37 +7,22 @@ const Spinner = CLI.Spinner;
 
 const _ = require('lodash');
 
-clear();
-
-console.log(
-    chalk.yellow(
-        figlet.textSync('Dump Tool', { horizontalLayout: 'full' })
-    )
-);
-
 const inquirer = require('inquirer');
 
 const lib = require('./app/lib');
 
-const run = async () => {
+const selectAction = async (actions) => {
     let results = await inquirer.prompt([
         {
             type: 'list',
             name: 'action',
             message: 'Действия',
-            choices: ['Скачать дамп', 'Развернуть дамп']
+            choices: actions
         }
     ]);
     lib.newline();
 
-    const selectedAction = results.action;
-
-    if (selectedAction === 'Скачать дамп') {
-        await dumpData();
-    }
-    if (selectedAction === 'Развернуть дамп') {
-        await applyDump();
-    }
+    return results.action;
 };
 
 const mysql = require('mysql2/promise');
@@ -229,4 +214,40 @@ const dumpData = async () => {
     connection.close();
 };
 
-run().then();
+const printHeader = () => {
+    console.log(
+        chalk.yellow(
+            figlet.textSync('Dump Tool', { horizontalLayout: 'full' })
+        )
+    );
+
+    let credentials = lib.getCredentials();
+    lib.reportCredentials(credentials);
+    lib.newline();
+};
+
+const mainLoop = async () => {
+    let running = true;
+    while (running) {
+        clear();
+        printHeader();
+
+        const selectedAction = await selectAction([
+            'Скачать дамп',
+            'Развернуть дамп',
+            'Сменить подключение',
+            'Выход',
+        ]);
+        if (selectedAction === 'Скачать дамп') {
+            await dumpData();
+        }
+        if (selectedAction === 'Развернуть дамп') {
+            await applyDump();
+        }
+        if (selectedAction === 'Выход') {
+            running = false;
+        }
+    }
+};
+
+mainLoop().then();
