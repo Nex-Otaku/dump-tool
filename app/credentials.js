@@ -12,7 +12,7 @@ const getShortDsn = (credentials) => {
     if (!credentials) {
         return '';
     }
-    
+
     return credentials.username + '@' + credentials.host + ':' + credentials.port;
 };
 
