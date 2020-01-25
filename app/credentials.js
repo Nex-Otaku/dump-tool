@@ -6,14 +6,41 @@ const conf = new Configstore(pkg.name);
 
 const chalk = require('chalk');
 
+const getShortDsn = (credentials) => {
+    if (!credentials) {
+        return '';
+    }
+    return credentials.username + '@' + credentials.host + ':' + credentials.port;
+};
+
+const addToKnownList = (credentials) => {
+    let list = conf.get('mysql.credentials-list');
+    if (!list) {
+        list = [];
+    }
+
+    const resultList = list.filter(item => item.shortDsn !== getShortDsn(credentials));
+
+    resultList.push({
+        shortDsn: getShortDsn(credentials),
+        credentials: credentials
+    });
+
+    conf.set('mysql.credentials-list', resultList);
+};
+
 module.exports = {
+    clear: () => {
+        conf.clear();
+    },
+
     report: (credentials) => {
         if (!credentials) {
             console.log(chalk.red('Не настроено подключение'));
             return;
         }
-        let shortDsn = credentials.username + '@' + credentials.host + ':' + credentials.port;
-        console.log(chalk.green(shortDsn));
+        let dsn = getShortDsn(credentials);
+        console.log(chalk.green(dsn));
     },
 
     get: () => {
@@ -22,6 +49,7 @@ module.exports = {
 
     set: (credentials) => {
         conf.set('mysql.credentials', credentials);
+        addToKnownList(credentials);
     },
 
     ask: () => {

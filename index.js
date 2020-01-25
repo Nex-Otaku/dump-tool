@@ -238,6 +238,7 @@ const mainLoop = async () => {
             'Скачать дамп',
             'Развернуть дамп',
             'Сменить подключение',
+            'Сбросить настройки',
             'Выход',
         ]);
         if (selectedAction === 'Скачать дамп') {
@@ -245,6 +246,10 @@ const mainLoop = async () => {
         }
         if (selectedAction === 'Развернуть дамп') {
             await applyDump();
+        }
+
+        if (selectedAction === 'Сбросить настройки') {
+            credentials.clear();
         }
 
         if (selectedAction === 'Выход') {
