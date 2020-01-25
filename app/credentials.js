@@ -12,6 +12,7 @@ const getShortDsn = (credentials) => {
     if (!credentials) {
         return '';
     }
+    
     return credentials.username + '@' + credentials.host + ':' + credentials.port;
 };
 
@@ -20,6 +21,7 @@ const getKnownList = () => {
     if (!list) {
         list = [];
     }
+
     return list;
 };
 
@@ -102,6 +104,7 @@ const report = (credentials) => {
         console.log(chalk.red('Не настроено подключение'));
         return;
     }
+
     let dsn = getShortDsn(credentials);
     console.log(chalk.green(dsn));
 };
@@ -120,17 +123,26 @@ const doSwitch = async () => {
         console.log('Подключений нет.');
         return;
     }
+
+    let dsnList = list.map(item => {
+        return {
+            name: item.shortDsn,
+            value: item.credentials,
+            short: item.shortDsn
+        }
+    });
+
     let results = await inquirer.prompt([
         {
             type: 'list',
             name: 'credentials',
             message: 'Подключение',
-            choices: list
+            choices: dsnList
         }
     ]);
-    lib.newline();
 
-    console.log(results.credentials);
+    lib.newline();
+    set(results.credentials);
 };
 
 const clear = () => {
