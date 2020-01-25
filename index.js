@@ -247,7 +247,12 @@ const mainLoop = async () => {
         if (selectedAction === 'Развернуть дамп') {
             await applyDump();
         }
-
+        if (selectedAction === 'Сменить подключение') {
+            await credentials.switch();
+        }
+        if (selectedAction === 'Добавить подключение') {
+            await credentials.new();
+        }
         if (selectedAction === 'Сбросить настройки') {
             credentials.clear();
         }
