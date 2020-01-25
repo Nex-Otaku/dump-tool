@@ -7,6 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
+  "preferGlobal": true,
+  "bin": "./index.js",
   "keywords": [],
   "author": "",
   "license": "ISC",
