@@ -206,7 +206,7 @@ const dumpData = async () => {
     const status = new Spinner('Выгружаю данные...');
     status.start();
 
-    const dumpCommand = 'mysqldump --no-create-info -u {user} -p{password} -h {host} --port {port} --single-transaction --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {table}-data.sql';
+    const dumpCommand = 'mysqldump --no-create-info -u {user} -p{password} -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {table}-data.sql';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
         host: credentials.host,
         port: credentials.port,
