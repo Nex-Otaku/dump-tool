@@ -2,7 +2,7 @@
 
 Simple Tool to copy table data from one MySQL DB to another.
 
-![dump-tool JPG](https://raw.githubusercontent.com/nex-otaku/dump-tool/master/img/screenshot.jpg)
+![dump-tool JPG](https://raw.githubusercontent.com/Nex-Otaku/dump-tool/master/img/screenshot.jpg)
 
 ## Features
 
