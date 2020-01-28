@@ -50,7 +50,6 @@ dump-tool
 
  - fix annoying "Press Any Key" bug
  - i18n
- - use temp folder to store dumps, currently store at working dir
  - autodetect missing mysqldump
  - auto check connection
  - export and import into single operation
