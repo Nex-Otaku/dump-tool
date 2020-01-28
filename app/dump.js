@@ -21,7 +21,12 @@ const applyDump = async () => {
     // Ищем файл по маске *.sql
     let pattern = '.*-data\.sql';
     let regex = new RegExp(pattern, 'ig');
-    const dumpFiles = files.getFilesWithRegex('.', regex);
+    const dumpFiles = files.getFilesWithRegex(files.getTempDirectoryPath(), regex);
+
+    if (dumpFiles.length === 0) {
+        console.log('Дампов нет');
+        return null;
+    }
 
     // Даём выбрать файл. (Выводим, какое количество времени назад он был создан)
     let results = await inquirer.prompt([
@@ -172,14 +177,20 @@ const dumpData = async () => {
     const status = new Spinner('Выгружаю данные...');
     status.start();
 
-    const dumpCommand = 'mysqldump --no-create-info -u {user} -p{password} -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {table}-data.sql';
+    const dumpFileName = lib.parametrize('{table}-data.sql', {
+        table: selectedTable
+    });
+    const dumpFilePath = files.getTempFilePath(dumpFileName);
+
+    const dumpCommand = 'mysqldump --no-create-info -u {user} -p{password} -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {dumpFilePath}';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
         host: remote.host,
         port: remote.port,
         user: remote.username,
         password: remote.password,
         db: selectedDb,
-        table: selectedTable
+        table: selectedTable,
+        dumpFilePath: dumpFilePath
     });
 
     let dumpOutput = await lib.shellRun(dumpCommandParametrized);
