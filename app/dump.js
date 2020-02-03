@@ -98,6 +98,8 @@ const applyDump = async () => {
     const status = new Spinner('Выгружаю данные...');
     status.start();
 
+    const dumpFilePath = files.getTempFilePath(selectedFile);
+
     const passwordOption = local.password.length === 0 ? '' : ' -p {password}';
     const dumpCommand = 'mysql -u {user} -h {host} --port {port} ' + passwordOption + ' {db} < {dumpfile}';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
@@ -106,7 +108,7 @@ const applyDump = async () => {
         user: local.username,
         password: local.password,
         db: selectedDb,
-        dumpfile: selectedFile
+        dumpfile: dumpFilePath
     });
 
     let dumpOutput = await lib.shellRun(dumpCommandParametrized);
