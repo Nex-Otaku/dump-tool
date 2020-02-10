@@ -208,7 +208,84 @@ const dumpData = async () => {
     connection.close();
 };
 
+const makeDbCopy = async () => {
+    // Выбираем локальную БД
+    const connection = await mysqlUtils.getConnection(mysqlUtils.getLocalConnectionCredentials());
+    const databases = await mysqlUtils.getDatabasesList(connection);
+
+    let results = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'db',
+            message: 'База данных',
+            choices: databases,
+            pageSize: 30,
+        }
+    ]);
+
+    lib.newline();
+
+    const selectedDb = results.db;
+
+    // Вводим название новой БД
+    const generatedCopyName = selectedDb + '_copy';
+
+    results = await inquirer.prompt([
+        {
+            name: 'destination',
+            type: 'input',
+            message: 'Название копии:',
+            default: generatedCopyName,
+            validate: function( value ) {
+                if (value.length) {
+                    return true;
+                } else {
+                    return 'Введите имя копии БД';
+                }
+            }
+        }]);
+
+    const destinationDb = results.destination;
+
+    // Удаляем БД назначения, если есть
+    await connection.execute(`DROP DATABASE IF EXISTS ${destinationDb}`);
+
+    // Создаём БД назначения
+    await connection.execute(`CREATE DATABASE ${destinationDb}`);
+
+    // Закрываем соединение.
+    connection.close();
+
+    // Создаём копию всех таблиц и данных.
+    const status = new Spinner('Копирую БД...');
+    status.start();
+
+    // Копируем структуру и данные в БД назначения
+    const local = mysqlUtils.getLocalConnectionCredentials();
+    const passwordOption = local.password.length === 0 ? '' : ' -p {password}';
+
+    const copyCommand = 'mysqldump -u {user} ' + passwordOption + ' -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {sourceDb} | mysql -u {user} -h {host} --port {port} ' + passwordOption + ' {destinationDb}';
+    const copyCommandParametrized = lib.parametrize(copyCommand, {
+        host: local.host,
+        port: local.port,
+        user: local.username,
+        password: local.password,
+        sourceDb: selectedDb,
+        destinationDb: destinationDb,
+    });
+
+    let output = await lib.shellRun(copyCommandParametrized);
+    status.stop();
+
+    if (_.trim(output).length > 0) {
+        console.log(output);
+    }
+
+    console.log('Создана копия БД.');
+};
+
 module.exports = {
     import: applyDump,
     export: dumpData,
+    makeCopy: makeDbCopy,
 };

@@ -50,6 +50,7 @@ const mainLoop = async () => {
         const selectedAction = await selectAction([
             'Скачать дамп',
             'Развернуть дамп',
+            'Сделать копию БД',
             'Сменить подключение',
             'Добавить подключение',
             'Сбросить настройки',
@@ -60,6 +61,9 @@ const mainLoop = async () => {
         }
         if (selectedAction === 'Развернуть дамп') {
             await dump.import();
+        }
+        if (selectedAction === 'Сделать копию БД') {
+            await dump.makeCopy();
         }
         if (selectedAction === 'Сменить подключение') {
             await credentials.switch();

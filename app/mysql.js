@@ -4,6 +4,15 @@ const lib = require('./lib');
 
 module.exports = {
 
+    getLocalConnectionCredentials: () => {
+        return {
+            host: 'localhost',
+            port: 3306,
+            username: 'root',
+            password: ''
+        };
+    },
+
     selectDb: async (connection, databaseName) => {
         connection.changeUser({database : databaseName}, function(err) {
             if (err) throw err;
