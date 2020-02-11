@@ -160,5 +160,6 @@ module.exports = {
     set: set,
     ask: ask,
     switch: doSwitch,
-    new: makeNew
+    new: makeNew,
+    getShortDsn: getShortDsn
 };

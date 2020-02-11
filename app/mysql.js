@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const _ = require('lodash');
 const lib = require('./lib');
+const credentials = require('./credentials');
 
 module.exports = {
 
@@ -29,14 +30,20 @@ module.exports = {
 
     },
 
-    getConnection: async (credentials) => {
-        const connection = await mysql.createConnection({
-            host     : credentials.host,
-            port: credentials.port,
-            user     : credentials.username,
-            password : credentials.password,
-        });
-        let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
+    getConnection: async (connectionCredentials) => {
+        let connection = null;
+        try {
+            connection = await mysql.createConnection({
+                host     : connectionCredentials.host,
+                port: connectionCredentials.port,
+                user     : connectionCredentials.username,
+                password : connectionCredentials.password,
+            });
+            let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
+        } catch (e) {
+            console.log('Не могу подключиться: ' + credentials.getShortDsn(connectionCredentials));
+            return null;
+        }
         return connection;
     },
 

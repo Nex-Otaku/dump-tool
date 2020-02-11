@@ -57,6 +57,9 @@ const applyDump = async () => {
     };
 
     const connection = await mysqlUtils.getConnection(local);
+    if (connection === null) {
+        return;
+    }
 
     const databases = await mysqlUtils.getDatabasesList(connection);
 
@@ -127,16 +130,13 @@ const dumpData = async () => {
         remote = await credentials.new();
     }
 
-    const connection = await mysql.createConnection({
-        host     : remote.host,
-        port: remote.port,
-        user     : remote.username,
-        password : remote.password,
-    });
-    let [rows, fields] = await connection.execute('SELECT 1 + 1 AS solution');
+    const connection = await mysqlUtils.getConnection(remote);
+    if (connection === null) {
+        return;
+    }
 
     // Выбираем БД для дампа из списка.
-    [rows, fields] = await connection.execute('show databases');
+    let [rows, fields] = await connection.execute('show databases');
     let databases = lib.extractColumn(rows, 'Database');
     // Исключаем служебную таблицу.
     databases = _.without(databases, 'information_schema');
@@ -211,6 +211,10 @@ const dumpData = async () => {
 const makeDbCopy = async () => {
     // Выбираем локальную БД
     const connection = await mysqlUtils.getConnection(mysqlUtils.getLocalConnectionCredentials());
+    if (connection === null) {
+        return;
+    }
+
     const databases = await mysqlUtils.getDatabasesList(connection);
 
     let results = await inquirer.prompt([
