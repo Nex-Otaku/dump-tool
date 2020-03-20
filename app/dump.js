@@ -92,7 +92,12 @@ const applyDump = async () => {
     await mysqlUtils.selectDb(connection, selectedDb);
 
     // Очищаем таблицу.
-    await connection.execute(`delete from ${tableName}`);
+    try {
+        await connection.execute(`delete from ${tableName}`);
+    } catch (e) {
+        console.error(e);
+        return;
+    }
 
     // Закрываем соединение.
     connection.close();
