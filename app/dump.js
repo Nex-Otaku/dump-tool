@@ -93,6 +93,7 @@ const applyDump = async () => {
 
     // Очищаем таблицу.
     try {
+        await connection.execute(`SET SESSION FOREIGN_KEY_CHECKS=0`);
         await connection.execute(`delete from ${tableName}`);
     } catch (e) {
         console.error(e);
