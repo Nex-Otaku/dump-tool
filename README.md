@@ -48,6 +48,7 @@ dump-tool
 
 ## To Be Done
 
+ - get rid of "Insecure Password Usage" warning
  - fix annoying "Press Any Key" bug
  - i18n
  - autodetect missing mysqldump
