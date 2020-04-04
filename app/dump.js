@@ -190,7 +190,8 @@ const dumpData = async () => {
     });
     const dumpFilePath = files.getTempFilePath(dumpFileName);
 
-    const dumpCommand = 'mysqldump --set-gtid-purged=OFF --no-create-info -u {user} -p"{password}" -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {dumpFilePath}';
+    // Была настройка --set-gtid-purged=OFF, пришлось убрать, т.к. валится с ошибкой unknown variable 'set-gtid-purged=OFF'
+    const dumpCommand = 'mysqldump --no-create-info -u {user} -p"{password}" -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {db} {table} > {dumpFilePath}';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
         host: remote.host,
         port: remote.port,
