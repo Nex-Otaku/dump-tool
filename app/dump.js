@@ -208,6 +208,25 @@ const dumpData = async () => {
     connection.close();
 };
 
+const deleteAllDumps = async () => {
+    // Ищем файл по маске *.sql
+    let pattern = '.*-data\.sql';
+    let regex = new RegExp(pattern, 'ig');
+    const dumpFiles = files.getFilesWithRegex(files.getTempDirectoryPath(), regex);
+
+    if (dumpFiles.length === 0) {
+        console.log('Дампов нет');
+        return null;
+    }
+
+    dumpFiles.forEach((dumpFileName) => {
+        const dumpFilePath = files.getTempFilePath(dumpFileName);
+        files.deleteFile(dumpFilePath);
+    });
+
+    console.log('Все дампы удалены.');
+};
+
 const makeDbCopy = async () => {
     // Выбираем локальную БД
     const connection = await mysqlUtils.getConnection(mysqlUtils.getLocalConnectionCredentials());
@@ -292,4 +311,5 @@ module.exports = {
     import: applyDump,
     export: dumpData,
     makeCopy: makeDbCopy,
+    deleteAll: deleteAllDumps,
 };

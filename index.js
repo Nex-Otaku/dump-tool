@@ -33,7 +33,8 @@ const selectAction = async (actions) => {
             type: 'list',
             name: 'action',
             message: 'Действия',
-            choices: actions
+            choices: actions,
+            pageSize: 50
         }
     ]);
     lib.newline();
@@ -54,6 +55,7 @@ const mainLoop = async () => {
             'Сменить подключение',
             'Добавить подключение',
             'Сбросить настройки',
+            'Удалить все дампы',
             'Выход',
         ]);
         if (selectedAction === 'Скачать дамп') {
@@ -73,6 +75,9 @@ const mainLoop = async () => {
         }
         if (selectedAction === 'Сбросить настройки') {
             credentials.clear();
+        }
+        if (selectedAction === 'Удалить все дампы') {
+            await dump.deleteAll();
         }
 
         if (selectedAction === 'Выход') {
