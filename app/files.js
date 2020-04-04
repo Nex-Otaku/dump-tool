@@ -32,6 +32,10 @@ const getFilesWithRegex = (path, regex) => {
     return dirCont.filter( function( elm ) {return elm.match(regex);});
 };
 
+const deleteFile = (filePath) => {
+    return fs.unlinkSync(filePath);
+};
+
 
 module.exports = {
 
@@ -45,5 +49,7 @@ module.exports = {
 
     getTempDirectoryPath: getTempDirectoryPath,
 
-    getTempFilePath: getTempFilePath
+    getTempFilePath: getTempFilePath,
+
+    deleteFile: deleteFile
 };
