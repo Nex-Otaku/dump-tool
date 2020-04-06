@@ -21,7 +21,7 @@
     "figlet": "^1.2.4",
     "inquirer": "^7.0.4",
     "lodash": "^4.17.15",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "mysql2": "^2.1.0",
     "press-any-key": "^0.1.1",
     "tmp": "^0.1.0"
