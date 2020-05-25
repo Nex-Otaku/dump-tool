@@ -104,7 +104,7 @@ const applyDump = async () => {
 
     const dumpFilePath = files.getTempFilePath(selectedFile);
 
-    const passwordOption = local.password.length === 0 ? '' : ' -p "{password}"';
+    const passwordOption = local.password.length === 0 ? '' : ' --password="{password}"';
     const dumpCommand = 'mysql -u {user} -h {host} --port {port} ' + passwordOption + ' {db} < {dumpfile}';
     const dumpCommandParametrized = lib.parametrize(dumpCommand, {
         host: local.host,
@@ -287,7 +287,7 @@ const makeDbCopy = async () => {
 
     // Копируем структуру и данные в БД назначения
     const local = mysqlUtils.getLocalConnectionCredentials();
-    const passwordOption = local.password.length === 0 ? '' : ' -p "{password}"';
+    const passwordOption = local.password.length === 0 ? '' : ' --password="{password}"';
 
     const copyCommand = 'mysqldump -u {user} ' + passwordOption + ' -h {host} --port {port} --single-transaction --skip-lock-tables --default-character-set=utf8mb4 --hex-blob --max-allowed-packet=512000000 {sourceDb} | mysql -u {user} -h {host} --port {port} ' + passwordOption + ' {destinationDb}';
     const copyCommandParametrized = lib.parametrize(copyCommand, {
