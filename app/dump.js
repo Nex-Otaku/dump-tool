@@ -49,12 +49,7 @@ const applyDump = async () => {
     }
 
     // Ищем соответствующие таблицы в локальной БД.
-    let local = {
-        host: 'localhost',
-        port: 3306,
-        username: 'root',
-        password: ''
-    };
+    let local = mysqlUtils.getLocalConnectionCredentials();
 
     const connection = await mysqlUtils.getConnection(local);
     if (connection === null) {
