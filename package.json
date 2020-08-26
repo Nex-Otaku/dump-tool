@@ -1,7 +1,7 @@
 {
   "name": "@nex-otaku/dump-tool",
   "version": "1.0.0",
-  "description": "",
+  "description": "Tool to dump and import MySQL tables",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,9 +9,13 @@
   },
   "preferGlobal": true,
   "bin": "./index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "mysql",
+    "dump",
+    "tool"
+  ],
+  "author": "Nex Otaku",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^3.0.0",
     "child-process-promise": "^2.2.1",
