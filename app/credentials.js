@@ -38,6 +38,33 @@ const addToKnownList = (credentials) => {
     conf.set('mysql.credentials-list', resultList);
 };
 
+const removeFromKnownList = (credentials) => {
+    let list = getKnownList();
+
+    const resultList = list.filter(item => item.shortDsn !== getShortDsn(credentials));
+
+    conf.set('mysql.credentials-list', resultList);
+};
+
+const selectDsnFromList = async (list) => {
+    let dsnList = list.map(item => {
+        return {
+            name: item.shortDsn,
+            value: item.credentials,
+            short: item.shortDsn
+        }
+    });
+
+    return await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'credentials',
+            message: 'Подключение',
+            choices: dsnList
+        }
+    ]);
+}
+
 const set = (credentials) => {
     conf.set('mysql.credentials', credentials);
     addToKnownList(credentials);
@@ -124,25 +151,23 @@ const doSwitch = async () => {
         return;
     }
 
-    let dsnList = list.map(item => {
-        return {
-            name: item.shortDsn,
-            value: item.credentials,
-            short: item.shortDsn
-        }
-    });
-
-    let results = await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'credentials',
-            message: 'Подключение',
-            choices: dsnList
-        }
-    ]);
+    const results = await selectDsnFromList(list);
 
     lib.newline();
     set(results.credentials);
+};
+
+const doDelete = async () => {
+    let list = getKnownList();
+    if (list.length === 0) {
+        console.log('Подключений нет.');
+        return;
+    }
+
+    const results = await selectDsnFromList(list);
+
+    lib.newline();
+    removeFromKnownList(results.credentials);
 };
 
 const clear = () => {
@@ -160,6 +185,7 @@ module.exports = {
     set: set,
     ask: ask,
     switch: doSwitch,
+    delete: doDelete,
     new: makeNew,
     getShortDsn: getShortDsn
 };

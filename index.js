@@ -54,6 +54,7 @@ const mainLoop = async () => {
             'Сделать копию БД',
             'Сменить подключение',
             'Добавить подключение',
+            'Удалить подключение',
             'Сбросить настройки',
             'Удалить все дампы',
             'Выход',
@@ -72,6 +73,9 @@ const mainLoop = async () => {
         }
         if (selectedAction === 'Добавить подключение') {
             await credentials.new();
+        }
+        if (selectedAction === 'Удалить подключение') {
+            await credentials.delete();
         }
         if (selectedAction === 'Сбросить настройки') {
             credentials.clear();
