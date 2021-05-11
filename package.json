@@ -24,7 +24,7 @@
     "configstore": "^5.0.0",
     "figlet": "^1.2.4",
     "inquirer": "^7.0.4",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "minimist": "^1.2.3",
     "mysql2": "^2.1.0",
     "press-any-key": "^0.1.1",
